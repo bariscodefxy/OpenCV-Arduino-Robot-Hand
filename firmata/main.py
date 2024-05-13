@@ -1,28 +1,67 @@
-import cv2, arduino
+import cv2
+import os, sys
+import face_recognition
+import numpy as np
+import math
+# import arduino
 
-face_cascade = cv2.CascadeClassifier(
-    cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
-)
+WINDOW_TITLE = 'Face Recognition'
 
-cap = cv2.VideoCapture(0)
+def face_confidence(face_distance, face_match_threshold=0.6):
+    range = (1.0 - face_match_threshold)
+    linear_val = (1.0 - face_distance) / (range * 2.0)
 
-while True:
-    ret, frame = cap.read()
+    if face_distance > face_match_threshold:
+        return str(round(linear_val * 100, 2)) + '%'
+    else:
+        value = (linear_val + ((1.0 - linear_val) * math.pow((linear_val - 0.5) * 2, 0.2))) * 100
+        return str(round(value, 2)) + '%'
 
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+class FaceRecognition:
+    face_locations = []
+    face_encodings = []
+    face_names = []
+    process_current_frame = True
 
-    faces = face_cascade.detectMultiScale(
-        gray, scaleFactor=1.1, minNeighbors=2, minSize=(150, 150)
-    )
+    def __init__(self):
+        pass 
 
-    for x, y, w, h in faces:
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-        # rotate_servo(servo1_pin, 300 - (x / (400 / 300)))
+    def run_recognition(self):
+        video_capture = cv2.VideoCapture(0)
 
-    cv2.imshow("Face Recognition", frame)
+        if not video_capture.isOpened():
+            sys.exit('Video source not found.')
 
-    if cv2.waitKey(1) & 0xFF == ord("q"):
-        break
+        while True:
+            ret, frame = video_capture.read()
 
-cap.release()
-cv2.destroyAllWindows()
+            if self.process_current_frame:
+                small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+                #rgb_small_frame = small_frame[:, :, ::-1]
+
+                self.face_locations = face_recognition.face_locations(small_frame)
+                self.face_encodings = face_recognition.face_encodings(small_frame, self.face_locations)
+
+            self.process_current_frame = not self.process_current_frame
+
+            for (top, right, bottom, left), face_encoding in zip(self.face_locations, self.face_encodings):
+                top *= 4
+                right *= 4
+                bottom *= 4
+                left *= 4
+
+                cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+
+            cv2.namedWindow(WINDOW_TITLE, cv2.WINDOW_NORMAL)
+            cv2.setWindowProperty(WINDOW_TITLE, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+            cv2.imshow(WINDOW_TITLE, frame)
+
+            if cv2.waitKey(1) == ord('q'):
+                break
+
+        video_capture.release()
+        cv2.destroyWindow(WINDOW_TITLE)
+
+if __name__ == '__main__':
+    fr = FaceRecognition()
+    fr.run_recognition()
