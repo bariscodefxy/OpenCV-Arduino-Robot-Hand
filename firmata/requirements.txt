@@ -1,3 +1,5 @@
 opencv-python
-face_recognition
+face_recognition @ git+https://github.com/bariscodefxy/face_recognition@master
 face_recognition_models
+pyfirmata @ git+https://github.com/bariscodefxy/pyFirmata@master
+setuptools
