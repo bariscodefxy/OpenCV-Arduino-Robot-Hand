@@ -1,3 +1,6 @@
+cmake
+wheel
+dlib
 opencv-python
 face_recognition @ git+https://github.com/bariscodefxy/face_recognition@master
 face_recognition_models
