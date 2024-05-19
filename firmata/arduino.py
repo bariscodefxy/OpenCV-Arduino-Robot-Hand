@@ -1,13 +1,19 @@
-from pyfirmata import Arduino, SERVO
-import sys
+from pyfirmata import SERVO, Arduino
+import sys, platform
 
 try:
-	board = Arduino("/dev/ttyUSB0")
+	if platform.system() == "Linux":
+		board = Arduino("/dev/ttyUSB0")
+	elif platform.system() == "Windows":
+		board = Arduino("COM8")
+	else:
+		print('This module doesn\'t support other OSes except Windows and Linux.')
+		sys.exit()
 except:
 	print('Failed to connect Arduino')
 	sys.exit()
 
-servo_floor_pin = 13
+servo_vertical_pin = 11
 servo_horizontal_pin = 12
 
 def rotate_servo(pin, angle):
@@ -17,8 +23,10 @@ def rotate_horizontal(angle):
 	rotate_servo(servo_horizontal_pin, angle)
 
 def rotate_vertical(angle):
-	rotate_servo(servo_floor_pin, angle)
+	rotate_servo(servo_vertical_pin, angle)
 
 def init_pins():
-	board.digital[servo_floor_pin].mode = SERVO
+	board.digital[servo_vertical_pin].mode = SERVO
 	board.digital[servo_horizontal_pin].mode = SERVO
+
+init_pins()
