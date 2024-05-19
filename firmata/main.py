@@ -3,7 +3,7 @@ import os, sys
 import face_recognition
 import numpy as np
 import math
-# import arduino
+import arduino
 
 WINDOW_TITLE = 'Face Recognition'
 
@@ -35,6 +35,16 @@ class FaceRecognition:
             self.process_current_frame = not self.process_current_frame
 
             for (top, right, bottom, left), face_encoding in zip(self.face_locations, self.face_encodings):
+                if not left == 0:
+                    arduino.rotate_vertical(180 - (left / (180 / left)) + ((left / (180 / left)) / 2))
+                else: 
+                    arduino.rotate_vertical(180)
+                    
+                if not top == 0:
+                    arduino.rotate_horizontal(180 - (top / (180 / top)) + ((top / (180 / top)) / 2))
+                else:
+                    arduino.rotate_horizontal(180)
+
                 top *= 4
                 right *= 4
                 bottom *= 4
