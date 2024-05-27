@@ -31,20 +31,15 @@ class FaceRecognition:
                 # rgb_small_frame = small_frame[:, :, ::-1]
 
                 self.face_locations = face_recognition.face_locations(small_frame)
-                self.face_encodings = face_recognition.face_encodings(small_frame, self.face_locations)
 
             self.process_current_frame = not self.process_current_frame
 
-            for (top, right, bottom, left), face_encoding in zip(self.face_locations, self.face_encodings):
-                if not left == 0:
-                    arduino.rotate_vertical(180 - (left / (180 / left)) + ((left / (180 / left)) / 2))
-                else: 
-                    arduino.rotate_vertical(180)
+            for (top, right, bottom, left) in self.face_locations:
+                if left > 0:
+                    arduino.rotate_horizontal(180 - (60 / (120 / left)))
                     
-                if not top == 0:
-                    arduino.rotate_horizontal(180 - (top / (180 / top)) + ((top / (180 / top)) / 2))
-                else:
-                    arduino.rotate_horizontal(180)
+                if bottom > 0:
+                    arduino.rotate_vertical((180 / (120 / bottom)))
 
                 top *= 4
                 right *= 4
@@ -54,7 +49,6 @@ class FaceRecognition:
                 cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
             cv2.namedWindow(WINDOW_TITLE, cv2.WINDOW_NORMAL)
-            cv2.setWindowProperty(WINDOW_TITLE, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
             cv2.imshow(WINDOW_TITLE, frame)
 
             if cv2.waitKey(1) == ord('q'):
