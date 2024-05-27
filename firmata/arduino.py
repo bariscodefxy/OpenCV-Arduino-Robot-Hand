@@ -1,11 +1,13 @@
-from pyfirmata import SERVO, Arduino
+from pyfirmata2 import SERVO, Arduino
 import sys, platform
 
 try:
 	if platform.system() == "Linux":
+		print("Detected Linux.")
 		board = Arduino("/dev/ttyUSB0")
 	elif platform.system() == "Windows":
-		board = Arduino("COM8")
+		print("Detected Windows.")
+		board = Arduino("COM3")
 	else:
 		print('This module doesn\'t support other OSes except Windows and Linux.')
 		sys.exit()
